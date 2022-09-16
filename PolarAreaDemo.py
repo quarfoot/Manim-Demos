@@ -28,7 +28,8 @@ class PADemo(Scene):
         rectend = MathTex(r"x=b", font_size=mediumfontsize).next_to(rectaxes.c2p(3, 0), DOWN)
         numPartitions = 6
         rectpartition = rectaxes.get_riemann_rectangles(rectgraph, x_range=[1, 3], dx=(3 - 1) / numPartitions,
-                                                        stroke_color=WHITE, fill_opacity=0.3)
+                                                        stroke_color=WHITE, fill_opacity=0.3,
+                                                        input_sample_type='right')
         rectgrp = VGroup(rectaxes, rectgraph, rectarea, rectlabel, rectstart, rectend, rectpartition)
 
         self.play(Succession(Create(rectaxes), FadeIn(rectgraph, rectlabel), FadeIn(rectarea),
@@ -44,7 +45,7 @@ class PADemo(Scene):
         rectlabel1 = MathTex(r"f(x_0)", font_size=smallfontsize, color=labelcolor).next_to(
             rectaxes.c2p(1, rectf(1) / 2), 0.5 * LEFT)
         rectlabel2 = MathTex(r"f(x_i)", font_size=smallfontsize, color=labelcolor).move_to(
-            rectaxes.c2p(2, rectf(2) / 2))
+            rectaxes.c2p(2.33, rectf(2.33) / 2))
         rectlabel3 = MathTex(r"f(x_n)", font_size=smallfontsize, color=labelcolor).next_to(
             rectaxes.c2p(3, rectf(3) / 2), 0.5 * RIGHT)
         self.play(FadeIn(brace, deltax, rectlabel1, rectlabel2, rectlabel3))
@@ -68,7 +69,7 @@ class PADemo(Scene):
         numSlides = 25
         for n in range(7, 7 + numSlides):
             pic = rectaxes.get_riemann_rectangles(rectgraph, x_range=[1, 3], dx=(3 - 1) / n,
-                                                  stroke_color=WHITE, fill_opacity=0.3)
+                                                  stroke_color=WHITE, fill_opacity=0.3, input_sample_type='right')
             self.play(Transform(rectpartition, pic), run_time=4 / numSlides)
 
         self.play(LaggedStart(Write(rderive[2]), Write(rderive[3]), lag_ratio=2))
@@ -118,11 +119,12 @@ class PADemo(Scene):
             thetastep = (thetab - thetaa) / numsectors
             sectors = VGroup()
             center = polaraxes.get_center()
-            for t in np.arange(thetaa, thetab, thetastep):
+            # use +thetastep in below line to get "right-endpoint" idea in polar
+            for t in np.arange(thetaa + thetastep, thetab + thetastep, thetastep):
                 pointoncurve = polaraxes.polar_to_point(polarf(t), t)
                 length = np.linalg.norm(pointoncurve - center)
                 sectors.add(Sector(arc_center=center, outer_radius=length,
-                                   start_angle=t, angle=thetastep, color=WHITE,
+                                   start_angle=t - thetastep, angle=thetastep, color=WHITE,
                                    fill_opacity=0.3, stroke_width=4, stroke_opacity=0.7))
             return sectors
 
@@ -167,13 +169,13 @@ class PADemo(Scene):
         self.wait()
         self.play(FadeOut(plabelgrp))
         # show number of sectors getting large
-        numSlides = 25
+        numSlides = 30
         for n in range(7, 7 + numSlides):
             pic = getRiemannSectors(n)
             self.play(Transform(psectors, pic), run_time=4 / numSlides)
 
         self.play(LaggedStart(Write(pderive[2]), Write(pderive[3]), lag_ratio=2))
-        self.wait(2)
+        self.wait(6)
         self.play(FadeOut(polargrp, pderive, sectorgrp))
         self.wait(1)
 
